@@ -1,0 +1,25 @@
+#!/bin/sh
+# ** AUTO GENERATED **
+# 3.8  Ensure rotation for customer created CMKs is enabled
+
+count=0
+for KeyId in `aws kms list-keys | jq '.Keys[].KeyId' | sed 's/"//g'`;
+do
+if [ "$(aws kms get-key-rotation-status --key-id $KeyId | grep "true" | wc -l)" -eq 1 ] ; then
+ count=$((count+1))
+fi
+done
+
+VARIABLE=$(for KeyId in `aws kms list-keys | jq '.Keys[].KeyId' | sed 's/"//g'`;
+do
+RotationStatusValue=$(aws kms get-key-rotation-status --key-id $KeyId | grep "true")
+if [ "$(aws kms get-key-rotation-status --key-id $KeyId | grep "true" | wc -l)" -eq 1 ] ; then
+ echo "{ \"RotationStatusValue\" : \"$RotationStatusValueValue\" }"
+fi
+done | tr '\n' ',' | sed 's/,$//')
+
+if [ "$count" -le "2" ]; then
+   echo "{ \"3.8  Ensure rotation for customer created CMKs is enabled\" :  [ $VARIABLE ] }"
+else
+   echo "{ \"KMSRotationEnabled\" : \"CMK Rotation not Enabled\" }"
+fi

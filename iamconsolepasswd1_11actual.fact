@@ -1,0 +1,26 @@
+#!/bin/sh
+#1.11 Do not setup access keys during initial user setup for all IAM users that have a console password
+# ** AUTO GENERATED **
+
+count=0
+aws iam generate-credential-report >/dev/null
+if [ "$(aws iam get-credential-report --query 'Content' --output text | base64 -d | cut -d, -f1,11 | grep "N/A" | wc -l)" -gt "0" ]; then
+   if [ "$(aws iam get-credential-report --query 'Content' --output text | base64 -d | cut -d, -f1,4 | grep true | sed 's/"//g' | wc -l)" -gt "0" ]; then
+      count=$((count+1))
+   fi
+fi
+
+VARIABLE=$(count=0
+aws iam generate-credential-report >/dev/null
+AccesskeyLastUsedDate=$(aws iam get-credential-report --query 'Content' --output text | base64 -d | cut -d, -f1,11 | grep "N/A")
+PasswdEnabled=aws iam get-credential-report --query 'Content' --output text | base64 -d | cut -d, -f1,4 | grep true
+if [ "$(aws iam get-credential-report --query 'Content' --output text | base64 -d | cut -d, -f1,11 | grep "N/A" | wc -l)" -gt "0" ]; then
+   if [ "$(aws iam get-credential-report --query 'Content' --output text | base64 -d | cut -d, -f1,4 | grep true | sed 's/"//g' | wc -l)" -gt "0" ]; then
+    echo "{ \"PasswdEnableStatus\" : \"$PasswdEnabled\",  \"AccesskeyLastUsedDateStatus\" : \"$AccesskeyLastUsedDate\" }"
+   fi
+fi | tr '\n' ',' | sed 's/,$//' )
+if [ "$count" -eq 0 ]; then
+   echo "{ \"AccessKeysDeleted\" : [ $VARIABLE ] }"
+else
+   echo "{ \"1.11 Do not setup access keys during initial user setup for all IAM users that have a console password\" : \"Setup access keys during initial user setup for all IAM users that have a console password\" }"
+fi

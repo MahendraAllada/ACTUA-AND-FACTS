@@ -1,0 +1,26 @@
+#!/bin/bash
+# ** AUTO GENERATED **
+# 3.5 Ensure AWS Config is enabled in all regions
+
+count=0
+if [ "$(aws configservice describe-configuration-recorders | jq '.ConfigurationRecorders[].recordingGroup' | grep allSupported | grep true | wc -l)" -gt "0" ] && [ "$(aws configservice describe-configuration-recorders | jq '.ConfigurationRecorders[].recordingGroup' | grep includeGlobalResourceTypes | grep true | wc -l)" -gt "0" ];then
+   if [ "$(aws configservice describe-configuration-recorder-status | jq '.ConfigurationRecordersStatus[].lastStatus' | grep SUCCESS | wc -l)" -gt "0" ] && [ "$(aws configservice describe-configuration-recorder-status | jq '.ConfigurationRecordersStatus[].recording' | grep true | wc -l)" -gt "0" ];then
+      count=$((count+1))
+   fi
+fi
+
+AllSupportedValue=$(aws configservice describe-configuration-recorders | jq '.ConfigurationRecorders[].recordingGroup' | grep allSupported)
+IncludeGlobalResourceTypes=$(aws configservice describe-configuration-recorders | jq '.ConfigurationRecorders[].recordingGroup' | grep includeGlobalResourceTypes)
+ConfigurationRecordersStatusValue=$(aws configservice describe-configuration-recorder-status | jq '.ConfigurationRecordersStatus[].lastStatus' | grep SUCCESS)
+Recording=$(aws configservice describe-configuration-recorder-status | jq '.ConfigurationRecordersStatus[].recording' | grep true)
+VARIABLE=$(if [ "$(aws configservice describe-configuration-recorders | jq '.ConfigurationRecorders[].recordingGroup' | grep allSupported | grep true | wc -l)" -gt "0" ] && [ "$(aws configservice describe-configuration-recorders | jq '.ConfigurationRecorders[].recordingGroup' | grep includeGlobalResourceTypes | grep true | wc -l)" -gt "0" ];then
+   if [ "$(aws configservice describe-configuration-recorder-status | jq '.ConfigurationRecordersStatus[].lastStatus' | grep SUCCESS | wc -l)" -gt "0" ] && [ "$(aws configservice describe-configuration-recorder-status | jq '.ConfigurationRecordersStatus[].recording' | grep true | wc -l)" -gt "0" ];then
+      echo "{ \"AllSupported\" : \"$AllSupportedValue\",  \"IncludeGlobalResourceTypes\" : \"$IncludeGlobalResourceTypesValue\", \"ConfigurationRecordersStatus\" : \"$ConfigurationRecordersStatusValue\", \"Recording\" : \"$RecordingValue\" }"
+   fi
+fi | tr '\n' ',' | sed 's/,$//')
+
+if [ "$count" -eq "0" ]; then
+echo "{ \"3.5 Ensure AWS Config is enabled in all regions\" : \"AWS Config not enabled\" }"
+else
+echo "{ \"AWSConfigEnabled\" : [ $VARIABLE ] }"
+fi
